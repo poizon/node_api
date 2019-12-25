@@ -4,8 +4,12 @@ const express = require('express'),
 
 const host = '127.0.0.1'
 const port = 7000
-const api_url = 'http://www.some-url.ru/cgi-bin/dsp.pl'
+const api_url = 'http://admin.some-site.ru/cgi-bin/request.pl'
+
 const handlebars = require('express-handlebars')
+
+var j = request.jar()
+request.defaults({jar:j})
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('views', './views')
@@ -21,13 +25,26 @@ app.get('/about', (req, res) => {
 
   request.post(
     {
+      'auth': {
+      'username': '',
+      'password': '',
+      'sendImmediately': false
+      },
+      headers:  {
+          name: 'content-type',
+          value: 'application/x-www-form-urlencoded'
+      },
       url: api_url,
       form: {
-        cl: 'callback',
-        event: 'ofd_callback',
+        start_date: '2019-01-01',
+        end_date: '2019-12-25',
+        package: '',
+        event: 'get_data',
+        v: 2
       }
     },
     (err, response, body) => {
+      console.log(body);
       if (err) return res.status(500).send({ message: err })
       // console.log(body)
       return res.render('about', { title: 'Get url from S2U', body: body })
